@@ -6,7 +6,7 @@ const gameInfo = document.querySelector(".gameinfo");
 const images = ["rock.png", "paper.png", "scissors.png"];
 
 let playerChoice;
-let playerParticle;
+// let playerParticle;
 let index = 0;
 
 // Removed unused placeholder getComputerChoice
@@ -16,20 +16,20 @@ function compareChoices(human, computer) {
     (human == "rock" && computer == "rock") ||
     (human == "paper" && computer == "paper") ||
     (human == "scissors" && computer == "scissors")
-  )
-    return "tie";
+  ) {
+    return "tie";}
   if (
     (human == "rock" && computer == "scissors") ||
     (human == "paper" && computer == "rock") ||
     (human == "scissors" && computer == "paper")
-  )
-    return "win";
+  ){
+    return "win";}
   if (
     (human == "rock" && computer == "paper") ||
     (human == "paper" && computer == "scissors") ||
     (human == "scissors" && computer == "rock")
-  )
-    return "loss";
+  ){
+    return "loss";}
 }
 
 function displayWinner(comparison, playerElem, computerElem) {
@@ -98,13 +98,14 @@ function gamePlay() {
 
       cardContainer.appendChild(computerResult.element);
 
-      playerParticle = playerChoice.firstElementChild.id.trim().toLowerCase();
+      // playerParticle = playerChoice.firstElementChild.id.trim().toLowerCase();
+
 
       // remove listeners to avoid duplicate resolves
       rpsCards.forEach((c) => c.removeEventListener("click", handler));
 
       resolve({
-        choice: playerParticle,
+        player: playerChoice.firstElementChild.id.trim().toLowerCase(),
         computer: computerResult.choice,
         playerElem: playerChoice,
         computerElem: computerResult.element,
