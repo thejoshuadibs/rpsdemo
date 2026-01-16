@@ -235,4 +235,5 @@ async function playGame() {
   displayWinner(result, playerElem, computerElem);
 }
 
+
 playGame();
