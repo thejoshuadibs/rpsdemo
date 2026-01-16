@@ -1,8 +1,15 @@
-import { computerChoice, gwara } from "./computerchoice.js";
+import { computerChoice } from "./computerchoice.js";
 
 const rpsCards = document.querySelectorAll(".card");
 const cardContainer = document.querySelector(".gamecards");
 const gameInfo = document.querySelector(".gameinfo");
+const images = ["rock.png", "paper.png", "scissors.png"];
+
+let playerChoice;
+let playerParticle;
+let index = 0;
+
+// Removed unused placeholder getComputerChoice
 
 function compareChoices(human, computer) {
   if (
@@ -25,25 +32,34 @@ function compareChoices(human, computer) {
     return "loss";
 }
 
-export async function gamePlay() {
-  rpsCards.forEach((item) => {
-    item.addEventListener("click", function (e) {
-      const colorName = item.classList[item.classList.length - 1];
+function displayWinner(comparison, playerElem, computerElem) {
+  if (comparison == "win") {
+    playerElem.classList.add("winner");
+  } else if (comparison == "loss") {
+    computerElem.classList.add("winner");
+  } else return;
+}
 
-      function getColorCode(name) {
-        switch (name) {
-          case "yellow":
-            return "#e3a852";
-          case "green":
-            return "#72896d";
-          case "red":
-            return "#e76c39";
-        }
+function gamePlay() {
+  return new Promise((resolve) => {
+    function getColorCode(name) {
+      switch (name) {
+        case "yellow":
+          return "#e3a852";
+        case "green":
+          return "#72896d";
+        case "red":
+          return "#e76c39";
       }
+    }
+
+    const handler = async function (e) {
+      const item = e.currentTarget;
+      const colorName = item.classList[item.classList.length - 1];
 
       const backgroundColor = getColorCode(colorName);
 
-      const playerChoice = e.currentTarget;
+      playerChoice = item;
       playerChoice.className = "chosencard";
       playerChoice.style.backgroundColor = backgroundColor;
 
@@ -59,25 +75,47 @@ export async function gamePlay() {
 
       cardContainer.textContent = "";
 
-      function displayWinner(comparison) {
-        if (comparison == "win") {
-          playerChoice.classList.add("winner");
-        } else if (comparison == "loss") {
-          computerChoice().classList.add("winner");
-        } else return;
-      }
+      const fakeChild = document.createElement("div");
+      const choiceImage = document.createElement("img");
 
+      fakeChild.className = "chosencard";
+      fakeChild.classList.add("mochoice");
+      choiceImage.className = "emoji";
+
+      fakeChild.appendChild(choiceImage);
+
+      // Await the computer choice (animation + final state)
       cardContainer.appendChild(playerChoice);
-      cardContainer.appendChild(computerChoice());
+      cardContainer.appendChild(fakeChild);
 
-      displayWinner(
-        compareChoices(
-          playerChoice.firstElementChild.id.trim().toLowerCase(),
-          gwara.trim().toLowerCase()
-        )
-      );
+      setInterval(() => {
+        choiceImage.setAttribute("src", `images/${images[index]}`);
+        index == 2 ? (index = 0) : index++;
+      }, 200);
+
+      const computerResult = await computerChoice();
+      cardContainer.removeChild(fakeChild);
+
+      cardContainer.appendChild(computerResult.element);
+
+      playerParticle = playerChoice.firstElementChild.id.trim().toLowerCase();
+
+      // remove listeners to avoid duplicate resolves
+      rpsCards.forEach((c) => c.removeEventListener("click", handler));
+
+      resolve({
+        choice: playerParticle,
+        computer: computerResult.choice,
+        playerElem: playerChoice,
+        computerElem: computerResult.element,
+      });
+    };
+
+    rpsCards.forEach((item) => {
+      item.addEventListener("click", handler);
     });
   });
 }
 
-//
+export { compareChoices, displayWinner, gamePlay };
+

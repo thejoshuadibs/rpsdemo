@@ -1,41 +1,35 @@
 const images = ["rock.png", "paper.png", "scissors.png"];
 const colors = ["yellow", "green", "red"];
 
-const moChoice = document.createElement("div");
-const choiceImage = document.createElement("img");
-const choiceLabel = document.createElement("div");
-
-const realIndex = Math.floor(Math.random() * 3);
-
 export function computerChoice() {
-  moChoice.classList.add("chosencard");
-  moChoice.classList.add("mochoice");
-  choiceImage.className = "emoji";
-  choiceLabel.className = "text";
+  return new Promise((resolve) => {
+    const moChoice = document.createElement("div");
+    const choiceImage = document.createElement("img");
+    const choiceLabel = document.createElement("div");
 
-  moChoice.appendChild(choiceImage);
+    const realIndex = Math.floor(Math.random() * 3);
 
-  let index = 0;
+    moChoice.className = "chosencard";
+    moChoice.classList.add("mochoice");
+    choiceImage.className = "emoji";
+    choiceLabel.className = "text";
 
-  const selectAnimation = setInterval(() => {
-    choiceImage.setAttribute("src", `images/${images[index]}`);
-    index == 2 ? (index = 0) : index++;
-  }, 200);
-
-  setTimeout(() => {
-    clearInterval(selectAnimation);
-    // choiceImage.classList.add(images[realIndex].split(".")[0])
-    choiceImage.setAttribute("src", `images/${images[realIndex]}`);
-    moChoice.classList.remove("mochoice");
-    moChoice.classList.add(colors[realIndex]);
+    moChoice.appendChild(choiceImage);
     moChoice.appendChild(choiceLabel);
-    choiceLabel.textContent = images[realIndex].split(".")[0];
-    choiceLabel.style.textTransform = "capitalize";
-  }, 5000);
 
-  debugger;
+    // let index = 0;
 
-  return moChoice;
+    setTimeout(() => {
+      // clearInterval(selectAnimation);
+      choiceImage.setAttribute("src", `images/${images[realIndex]}`);
+      moChoice.classList.remove("mochoice");
+      moChoice.classList.add(colors[realIndex]);
+      moChoice.classList.add("comot");
+      choiceLabel.textContent = images[realIndex].split(".")[0];
+      choiceLabel.style.textTransform = "capitalize";
+
+      const choiceString = images[realIndex].split(".")[0].trim().toLowerCase();
+      resolve({ element: moChoice, choice: choiceString });
+    }, 5000);
+  });
 }
-
-export const gwara = images[realIndex].split(".")[0];

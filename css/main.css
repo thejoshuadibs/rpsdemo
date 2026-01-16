@@ -401,6 +401,10 @@ img {
   background-color: #c9501c;
 }
 
+.comot {
+  pointer-events: none;
+}
+
 .avatarchoice {
   background-color: #17181adf;
   color: white;

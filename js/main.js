@@ -1,4 +1,4 @@
-import { gamePlay } from "./modules/gameplay.js";
+import { gamePlay, compareChoices, displayWinner } from "./modules/gameplay.js";
 
 const downArrow1 = document.querySelector(".downarrow1");
 const downArrow2 = document.querySelector(".downarrow2");
@@ -23,8 +23,9 @@ function displayButton() {
   downArrow1.style.display = "block";
 }
 
-// 1. The reusable 'wait' utility
+// 1. The reusable 'pause' utility
 const wait = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+const pause = (ms) => new Promise((res) => setTimeout(res, ms));
 
 // 2. The Typewriter Function
 async function typeEffect(elementId, text, speed = 100) {
@@ -33,7 +34,7 @@ async function typeEffect(elementId, text, speed = 100) {
 
   for (let i = 0; i < text.length; i++) {
     element.innerHTML += text.charAt(i);
-    await wait(speed); // This replaces the messy nested setTimeout
+    await pause(speed); // This replaces the messy nested setTimeout
   }
 }
 
@@ -50,7 +51,6 @@ async function deleteEffect(elementId, text, speed = 100) {
   }
 }
 
-const pause = (ms) => new Promise((res) => setTimeout(res, ms));
 
 async function runSequence() {
   // First one starts
@@ -171,10 +171,10 @@ downArrow2.addEventListener("click", async function () {
   gameScreen.style.top = 0;
   await setTimeout(() => {
     avatarScreen.classList.add("avatar-switch");
-  }, 3000);
+  }, 2000);
   await setTimeout(() => {
     avatarScreen.classList.add("avatarblur");
-  }, 4000);
+  }, 3000);
 });
 
 let check = true;
@@ -229,6 +229,10 @@ avatars.forEach((item) => {
   });
 });
 
-gamePlay();
+async function playGame() {
+  const { player, computer, playerElem, computerElem } = await gamePlay();
+  const result = compareChoices(player, computer);
+  displayWinner(result, playerElem, computerElem);
+}
 
-// Bloop bloop bloop
+playGame();
