@@ -17,8 +17,6 @@ export function computerChoice() {
     moChoice.appendChild(choiceImage);
     moChoice.appendChild(choiceLabel);
 
-    // let index = 0;
-
     setTimeout(() => {
       // clearInterval(selectAnimation);
       choiceImage.setAttribute("src", `images/${images[realIndex]}`);

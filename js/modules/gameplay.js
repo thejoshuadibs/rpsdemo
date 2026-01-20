@@ -5,7 +5,7 @@ const cardContainer = document.querySelector(".gamecards");
 const gameInfo = document.querySelector(".gameinfo");
 const images = ["rock.png", "paper.png", "scissors.png"];
 
-const playerChoice = document.createElement("div")
+const playerChoice = document.createElement("div");
 
 const playerLife = document.querySelectorAll(".playerlife>.lifeunit");
 const botLife = document.querySelectorAll(".botlife>.lifeunit");
@@ -13,10 +13,7 @@ const botLife = document.querySelectorAll(".botlife>.lifeunit");
 const roundSwitch = document.createElement("button");
 roundSwitch.className = "round-switch";
 roundSwitch.textContent = "Next Round";
-// let playerParticle;
 let index = 0;
-
-// Removed unused placeholder getComputerChoice
 
 function compareChoices(human, computer) {
   if (
@@ -24,35 +21,30 @@ function compareChoices(human, computer) {
     (human == "paper" && computer == "paper") ||
     (human == "scissors" && computer == "scissors")
   ) {
-    console.log(playerChoice)
     return "tie";
-  }
-  if (
+  } else if (
     (human == "rock" && computer == "scissors") ||
     (human == "paper" && computer == "rock") ||
     (human == "scissors" && computer == "paper")
   ) {
-    console.log(playerChoice)
     return "win";
-  }
-  if (
+  } else if (
     (human == "rock" && computer == "paper") ||
     (human == "paper" && computer == "scissors") ||
     (human == "scissors" && computer == "rock")
   ) {
-    console.log(playerChoice)
     return "loss";
   }
 }
 
 function displayWinner(comparison, playerElem, computerElem) {
   if (comparison == "win") {
-    console.log(playerChoice)
     playerElem.classList.add("winner");
   } else if (comparison == "loss") {
-    console.log(playerChoice)
     computerElem.classList.add("winner");
-  } else return;
+  } else {
+    return;
+  }
 }
 
 function gamePlay() {
@@ -75,17 +67,17 @@ function gamePlay() {
       const backgroundColor = getColorCode(colorName);
 
       // const playerChoice = document.createElement("div")
-      const playerImage = document.createElement("img")
-      const playerText = document.createElement("div")
+      const playerImage = document.createElement("img");
+      const playerText = document.createElement("div");
 
-      playerImage.className = "emoji"
-      playerImage.src = `images/${item.firstElementChild.id.toLowerCase()}.png`
+      playerImage.className = "emoji";
+      playerImage.src = `images/${item.firstElementChild.id.toLowerCase()}.png`;
 
-      playerText.className = "text"
-      playerText.textContent = item.firstElementChild.id
+      playerText.className = "text";
+      playerText.textContent = item.firstElementChild.id;
 
-      playerChoice.appendChild(playerImage)
-      playerChoice.appendChild(playerText)
+      playerChoice.appendChild(playerImage);
+      playerChoice.appendChild(playerText);
       playerChoice.className = "chosencard";
       playerChoice.style.backgroundColor = backgroundColor;
 
@@ -128,9 +120,8 @@ function gamePlay() {
       // remove listeners to avoid duplicate resolves
       rpsCards.forEach((c) => c.removeEventListener("click", handler));
 
-
       resolve({
-        player: playerChoice.firstElementChild.id.trim().toLowerCase(),
+        player: item.firstElementChild.id.trim().toLowerCase(),
         computer: computerResult.choice,
         playerElem: playerChoice,
         computerElem: computerResult.element,
@@ -142,7 +133,6 @@ function gamePlay() {
     });
   });
 }
-
 
 function addPoint(result) {
   let i = 4;
@@ -158,15 +148,20 @@ function addPoint(result) {
   }
 }
 
-function switchRound() {
-    cardContainer.textContent = "";
-    rpsCards.forEach((item) => {
-      cardContainer.appendChild(item);
-    });
-    playerElem.classList.remove("winner");
-    computerElem.classList.remove("winner");
-  }
+const originalCards = Array.from(rpsCards);
 
-roundSwitch.addEventListener("click", switchRound);
+function switchRound() {
+  cardContainer.textContent = "";
+  originalCards.forEach((item) => {
+    cardContainer.appendChild(item);
+  });
+  playerElem.classList.remove("winner");
+  computerElem.classList.remove("winner");
+}
+
+roundSwitch.addEventListener("click", () => {
+  switchRound();
+  window.playGame();
+});
 
 export { compareChoices, displayWinner, gamePlay, addPoint, roundSwitch };
