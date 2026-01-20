@@ -5,7 +5,14 @@ const cardContainer = document.querySelector(".gamecards");
 const gameInfo = document.querySelector(".gameinfo");
 const images = ["rock.png", "paper.png", "scissors.png"];
 
-let playerChoice;
+const playerChoice = document.createElement("div")
+
+const playerLife = document.querySelectorAll(".playerlife>.lifeunit");
+const botLife = document.querySelectorAll(".botlife>.lifeunit");
+
+const roundSwitch = document.createElement("button");
+roundSwitch.className = "round-switch";
+roundSwitch.textContent = "Next Round";
 // let playerParticle;
 let index = 0;
 
@@ -17,25 +24,33 @@ function compareChoices(human, computer) {
     (human == "paper" && computer == "paper") ||
     (human == "scissors" && computer == "scissors")
   ) {
-    return "tie";}
+    console.log(playerChoice)
+    return "tie";
+  }
   if (
     (human == "rock" && computer == "scissors") ||
     (human == "paper" && computer == "rock") ||
     (human == "scissors" && computer == "paper")
-  ){
-    return "win";}
+  ) {
+    console.log(playerChoice)
+    return "win";
+  }
   if (
     (human == "rock" && computer == "paper") ||
     (human == "paper" && computer == "scissors") ||
     (human == "scissors" && computer == "rock")
-  ){
-    return "loss";}
+  ) {
+    console.log(playerChoice)
+    return "loss";
+  }
 }
 
 function displayWinner(comparison, playerElem, computerElem) {
   if (comparison == "win") {
+    console.log(playerChoice)
     playerElem.classList.add("winner");
   } else if (comparison == "loss") {
+    console.log(playerChoice)
     computerElem.classList.add("winner");
   } else return;
 }
@@ -59,7 +74,18 @@ function gamePlay() {
 
       const backgroundColor = getColorCode(colorName);
 
-      playerChoice = item;
+      // const playerChoice = document.createElement("div")
+      const playerImage = document.createElement("img")
+      const playerText = document.createElement("div")
+
+      playerImage.className = "emoji"
+      playerImage.src = `images/${item.firstElementChild.id.toLowerCase()}.png`
+
+      playerText.className = "text"
+      playerText.textContent = item.firstElementChild.id
+
+      playerChoice.appendChild(playerImage)
+      playerChoice.appendChild(playerText)
       playerChoice.className = "chosencard";
       playerChoice.style.backgroundColor = backgroundColor;
 
@@ -86,6 +112,7 @@ function gamePlay() {
 
       // Await the computer choice (animation + final state)
       cardContainer.appendChild(playerChoice);
+      cardContainer.appendChild(roundSwitch);
       cardContainer.appendChild(fakeChild);
 
       setInterval(() => {
@@ -98,11 +125,9 @@ function gamePlay() {
 
       cardContainer.appendChild(computerResult.element);
 
-      // playerParticle = playerChoice.firstElementChild.id.trim().toLowerCase();
-
-
       // remove listeners to avoid duplicate resolves
       rpsCards.forEach((c) => c.removeEventListener("click", handler));
+
 
       resolve({
         player: playerChoice.firstElementChild.id.trim().toLowerCase(),
@@ -118,5 +143,30 @@ function gamePlay() {
   });
 }
 
-export { compareChoices, displayWinner, gamePlay };
 
+function addPoint(result) {
+  let i = 4;
+  let j = 0;
+  if (result == "win") {
+    playerLife[i].classList.add("lifeunit--win");
+    i--;
+  } else if (result == "loss") {
+    botLife[j].classList.add("lifeunit--win");
+    j++;
+  } else {
+    return;
+  }
+}
+
+function switchRound() {
+    cardContainer.textContent = "";
+    rpsCards.forEach((item) => {
+      cardContainer.appendChild(item);
+    });
+    playerElem.classList.remove("winner");
+    computerElem.classList.remove("winner");
+  }
+
+roundSwitch.addEventListener("click", switchRound);
+
+export { compareChoices, displayWinner, gamePlay, addPoint, roundSwitch };

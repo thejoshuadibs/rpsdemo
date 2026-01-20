@@ -1,4 +1,5 @@
 @import url(./reset.css);
+@import url(./button.css);
 
 body {
   font-family: "Instrument Sans", sans-serif;
@@ -311,8 +312,30 @@ img {
 .lifeunit {
   width: 1.8rem;
   height: 1.8rem;
-  background-color: #372517;
   background-color: #9c7e4b;
+}
+
+.lifeunit--win {
+  animation: glow 2.5s ease;
+  background-color: #372517;
+}
+
+@keyframes glow {
+  0% {
+    box-shadow: none;
+  }
+  25% {
+    box-shadow: 0px 0px 5px 5px #ffb300b3;
+  }
+  50% {
+    box-shadow: 0px 0px 5px 5px #ffb300b3;
+  }
+  75% {
+    box-shadow: 0px 0px 5px 5px #ffb300b3;
+  }
+  100% {
+    box-shadow: none;
+  }
 }
 
 .round {
@@ -348,7 +371,10 @@ img {
   height: 19rem;
   cursor: pointer;
   transform: scale(1);
-  transition: filter 500ms ease, top 500ms ease, transform 100ms ease;
+  transition:
+    filter 500ms ease,
+    top 500ms ease,
+    transform 100ms ease;
 }
 
 .chosencard {

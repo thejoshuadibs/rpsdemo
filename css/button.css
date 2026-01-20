@@ -1,0 +1,35 @@
+.round-switch {
+  height: fit-content;
+  align-self: flex-end;
+  background-color: #e3a852;
+  padding: 1rem 2rem;
+  filter: opacity(0);
+  border: none;
+  border-radius: 5px;
+  font-weight: 600;
+  position: relative;
+  animation: showup 1s ease-in-out 1s forwards;
+  animation-play-state: paused;
+}
+
+@keyframes showup {
+  from {
+    top: 0;
+    filter: opacity(0);
+  }
+  to {
+    top: -50px;
+    filter: opacity(1);
+  }
+}
+
+.round-switch:hover {
+  background-color: #372517;
+  color: white;
+}
+
+.round-switch:active {
+  background-color: #fff;
+  color: #372517;
+  border: 2px solid #372517;
+}

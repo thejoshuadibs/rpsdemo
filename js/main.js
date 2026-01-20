@@ -1,4 +1,10 @@
-import { gamePlay, compareChoices, displayWinner } from "./modules/gameplay.js";
+import {
+  gamePlay,
+  compareChoices,
+  displayWinner,
+  addPoint,
+  roundSwitch,
+} from "./modules/gameplay.js";
 
 const downArrow1 = document.querySelector(".downarrow1");
 const downArrow2 = document.querySelector(".downarrow2");
@@ -51,7 +57,6 @@ async function deleteEffect(elementId, text, speed = 100) {
   }
 }
 
-
 async function runSequence() {
   // First one starts
   await typeEffect("first", "Welcome aboard!", 100);
@@ -92,7 +97,7 @@ downArrow1.addEventListener("click", () => {
 });
 
 upArrow.addEventListener("click", () =>
-  secondScreen.classList.remove("secondscreen")
+  secondScreen.classList.remove("secondscreen"),
 );
 
 let screenContents = [
@@ -233,7 +238,8 @@ async function playGame() {
   const { player, computer, playerElem, computerElem } = await gamePlay();
   const result = compareChoices(player, computer);
   displayWinner(result, playerElem, computerElem);
+  addPoint(result);
+  roundSwitch.style.animationPlayState = "running";
 }
-
 
 playGame();
