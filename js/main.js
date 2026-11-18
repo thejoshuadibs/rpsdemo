@@ -114,7 +114,7 @@ function insertContent() {
   } else if (counter > 0) {
     if (leftArrow) leftArrow.style.display = "block";
     if (rightArrow) rightArrow.style.display = "block";
-    if (downArrow2) downArrow2.style.display = "none';
+    if (downArrow2) downArrow2.style.display = "none";
     if (upArrow) upArrow.style.display = "none";
   } else {
     if (upArrow) upArrow.style.display = "block";
