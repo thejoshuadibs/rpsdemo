@@ -93,7 +93,8 @@ function gamePlay() {
       choiceImage.className = "emoji";
       fakeChild.appendChild(choiceImage);
       roundSwitch.disabled = true;
-      cardContainer.replaceChildren(playerChoice, roundSwitch, fakeChild);
+      roundSwitch.style.animationPlayState = "paused";
+      cardContainer.replaceChildren(playerChoice, fakeChild);
 
       const animation = setInterval(() => {
         choiceImage.setAttribute("src", `images/${images[imageIndex]}`);
@@ -107,7 +108,9 @@ function gamePlay() {
         clearInterval(animation);
       }
 
-      cardContainer.replaceChildren(playerChoice, roundSwitch, computerResult.element);
+      // Display Mo's final choice first. The next-round button is added after
+      // this promise resolves and the result has been rendered.
+      cardContainer.replaceChildren(playerChoice, computerResult.element);
       roundSwitch.disabled = false;
       resolve({ player: choice, computer: computerResult.choice, playerElem: playerChoice, computerElem: computerResult.element });
     };
@@ -158,8 +161,17 @@ async function runGameLoop() {
   if (playerScore >= playerLife.length || botScore >= botLife.length) {
     gameInfo.textContent = playerScore >= playerLife.length ? "You win!" : "Mo wins!";
     roundSwitch.textContent = "Play Again";
+  } else {
+    roundSwitch.textContent = "Next Round";
   }
-  roundSwitch.style.animationPlayState = "running";
+
+  // Insert the button only once the computer's selected card is on screen,
+  // then start its CSS animation on the next frame.
+  roundSwitch.style.animationPlayState = "paused";
+  cardContainer.appendChild(roundSwitch);
+  requestAnimationFrame(() => {
+    roundSwitch.style.animationPlayState = "running";
+  });
 }
 
 export { compareChoices, displayWinner, gamePlay, addPoint, roundSwitch, startRound, switchRound, resetMatch, runGameLoop };
