@@ -7,6 +7,7 @@ const gameInfo = document.querySelector(".gameinfo");
 const roundLabel = document.querySelector(".round");
 const playerLife = Array.from(document.querySelectorAll(".playerlife > .lifeunit"));
 const botLife = Array.from(document.querySelectorAll(".botlife > .lifeunit"));
+const images = ["rock.png", "paper.png", "scissors.png"];
 
 const roundSwitch = document.createElement("button");
 roundSwitch.type = "button";
@@ -17,31 +18,25 @@ let round = 1;
 let playerScore = 0;
 let botScore = 0;
 let acceptingChoice = true;
+let imageIndex = 0;
 
 function compareChoices(human, computer) {
   if (!choices.includes(human) || !choices.includes(computer)) return undefined;
   if (human === computer) return "tie";
 
-  const winningChoices = {
-    rock: "scissors",
-    paper: "rock",
-    scissors: "paper",
-  };
-
+  const winningChoices = { rock: "scissors", paper: "rock", scissors: "paper" };
   return winningChoices[human] === computer ? "win" : "loss";
 }
 
 function displayWinner(comparison, playerElem, computerElem) {
   playerElem?.classList.remove("winner");
   computerElem?.classList.remove("winner");
-
   if (comparison === "win") playerElem?.classList.add("winner");
   if (comparison === "loss") computerElem?.classList.add("winner");
 }
 
 function addPoint(result) {
   if (result === "tie") return;
-
   if (result === "win") {
     playerLife[playerScore]?.classList.add("lifeunit--win");
     playerScore = Math.min(playerScore + 1, playerLife.length);
@@ -63,7 +58,6 @@ function gamePlay() {
     }
 
     acceptingChoice = true;
-
     const handler = async (event) => {
       if (!acceptingChoice) return;
       acceptingChoice = false;
@@ -71,18 +65,15 @@ function gamePlay() {
       const card = event.currentTarget;
       const image = card.querySelector("img");
       const choice = image?.id?.trim().toLowerCase();
-
       if (!choices.includes(choice)) {
         acceptingChoice = true;
         return;
       }
 
       rpsCards.forEach((item) => item.removeEventListener("click", handler));
-
       const playerChoice = document.createElement("div");
       const playerImage = document.createElement("img");
       const playerText = document.createElement("div");
-
       playerImage.className = "emoji";
       playerImage.src = `images/${choice}.png`;
       playerImage.alt = `${choice} hand`;
@@ -96,19 +87,29 @@ function gamePlay() {
         Object.assign(document.createElement("div"), { textContent: "Mo" }),
       );
 
+      const fakeChild = document.createElement("div");
+      const choiceImage = document.createElement("img");
+      fakeChild.className = "chosencard mochoice";
+      choiceImage.className = "emoji";
+      fakeChild.appendChild(choiceImage);
       roundSwitch.disabled = true;
-      cardContainer.replaceChildren(playerChoice, roundSwitch);
+      cardContainer.replaceChildren(playerChoice, roundSwitch, fakeChild);
 
-      const computerResult = await computerChoice();
+      const animation = setInterval(() => {
+        choiceImage.setAttribute("src", `images/${images[imageIndex]}`);
+        imageIndex = (imageIndex + 1) % images.length;
+      }, 200);
+
+      let computerResult;
+      try {
+        computerResult = await computerChoice();
+      } finally {
+        clearInterval(animation);
+      }
+
       cardContainer.replaceChildren(playerChoice, roundSwitch, computerResult.element);
       roundSwitch.disabled = false;
-
-      resolve({
-        player: choice,
-        computer: computerResult.choice,
-        playerElem: playerChoice,
-        computerElem: computerResult.element,
-      });
+      resolve({ player: choice, computer: computerResult.choice, playerElem: playerChoice, computerElem: computerResult.element });
     };
 
     rpsCards.forEach((item) => item.addEventListener("click", handler));
@@ -117,9 +118,7 @@ function gamePlay() {
 
 function switchRound() {
   cardContainer?.replaceChildren(...rpsCards);
-  document.querySelectorAll(".winner").forEach((element) => {
-    element.classList.remove("winner");
-  });
+  document.querySelectorAll(".winner").forEach((element) => element.classList.remove("winner"));
   if (gameInfo) gameInfo.textContent = "Choose One:";
 }
 
@@ -133,13 +132,11 @@ function startRound() {
       resetMatch();
       return;
     }
-
     round += 1;
     roundLabel.textContent = `ROUND ${round}`;
     switchRound();
     await runGameLoop();
   };
-
   void runGameLoop();
 }
 
@@ -155,16 +152,13 @@ function resetMatch() {
 async function runGameLoop() {
   const { player, computer, playerElem, computerElem } = await gamePlay();
   if (!player || !computer) return;
-
   const result = compareChoices(player, computer);
   displayWinner(result, playerElem, computerElem);
   addPoint(result);
-
   if (playerScore >= playerLife.length || botScore >= botLife.length) {
     gameInfo.textContent = playerScore >= playerLife.length ? "You win!" : "Mo wins!";
     roundSwitch.textContent = "Play Again";
   }
-
   roundSwitch.style.animationPlayState = "running";
 }
 
