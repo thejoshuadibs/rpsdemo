@@ -1,5 +1,6 @@
 import { computerChoice } from "./computerchoice.js";
 
+const choices = ["rock", "paper", "scissors"];
 const rpsCards = Array.from(document.querySelectorAll(".card"));
 const cardContainer = document.querySelector(".gamecards");
 const gameInfo = document.querySelector(".gameinfo");
@@ -18,6 +19,7 @@ let botScore = 0;
 let acceptingChoice = true;
 
 function compareChoices(human, computer) {
+  if (!choices.includes(human) || !choices.includes(computer)) return undefined;
   if (human === computer) return "tie";
 
   const winningChoices = {
@@ -43,26 +45,10 @@ function addPoint(result) {
   if (result === "win") {
     playerLife[playerScore]?.classList.add("lifeunit--win");
     playerScore = Math.min(playerScore + 1, playerLife.length);
-  } else {
+  } else if (result === "loss") {
     botLife[botScore]?.classList.add("lifeunit--win");
     botScore = Math.min(botScore + 1, botLife.length);
   }
-}
-
-function resetMatch() {
-  round = 1;
-  playerScore = 0;
-  botScore = 0;
-
-  [...playerLife, ...botLife].forEach((unit) => {
-    unit.classList.remove("lifeunit--win");
-  });
-
-  if (roundLabel) roundLabel.textContent = "ROUND 1";
-  roundSwitch.textContent = "Next Round";
-  roundSwitch.onclick = null;
-  switchRound();
-  startRound();
 }
 
 function getColorName(card) {
@@ -102,7 +88,6 @@ function gamePlay() {
       playerImage.alt = `${choice} hand`;
       playerText.className = "text";
       playerText.textContent = choice[0].toUpperCase() + choice.slice(1);
-
       playerChoice.className = `chosencard ${getColorName(card) || ""}`;
       playerChoice.append(playerImage, playerText);
 
@@ -111,10 +96,12 @@ function gamePlay() {
         Object.assign(document.createElement("div"), { textContent: "Mo" }),
       );
 
+      roundSwitch.disabled = true;
       cardContainer.replaceChildren(playerChoice, roundSwitch);
 
       const computerResult = await computerChoice();
       cardContainer.replaceChildren(playerChoice, roundSwitch, computerResult.element);
+      roundSwitch.disabled = false;
 
       resolve({
         player: choice,
@@ -133,19 +120,15 @@ function switchRound() {
   document.querySelectorAll(".winner").forEach((element) => {
     element.classList.remove("winner");
   });
-  gameInfo && (gameInfo.textContent = "Choose One:");
+  if (gameInfo) gameInfo.textContent = "Choose One:";
 }
-
-let nextRoundHandler;
 
 function startRound() {
   if (!roundLabel) return;
   roundLabel.textContent = `ROUND ${round}`;
-
   switchRound();
-  if (roundSwitch.isConnected) roundSwitch.remove();
-
-  nextRoundHandler = async () => {
+  roundSwitch.textContent = "Next Round";
+  roundSwitch.onclick = async () => {
     if (playerScore >= playerLife.length || botScore >= botLife.length) {
       resetMatch();
       return;
@@ -157,7 +140,16 @@ function startRound() {
     await runGameLoop();
   };
 
-  roundSwitch.onclick = nextRoundHandler;
+  void runGameLoop();
+}
+
+function resetMatch() {
+  round = 1;
+  playerScore = 0;
+  botScore = 0;
+  [...playerLife, ...botLife].forEach((unit) => unit.classList.remove("lifeunit--win"));
+  if (roundLabel) roundLabel.textContent = "ROUND 1";
+  startRound();
 }
 
 async function runGameLoop() {
@@ -169,22 +161,11 @@ async function runGameLoop() {
   addPoint(result);
 
   if (playerScore >= playerLife.length || botScore >= botLife.length) {
-    const winner = playerScore >= playerLife.length ? "You win!" : "Mo wins!";
-    gameInfo.textContent = winner;
+    gameInfo.textContent = playerScore >= playerLife.length ? "You win!" : "Mo wins!";
     roundSwitch.textContent = "Play Again";
   }
 
   roundSwitch.style.animationPlayState = "running";
 }
 
-export {
-  compareChoices,
-  displayWinner,
-  gamePlay,
-  addPoint,
-  roundSwitch,
-  startRound,
-  switchRound,
-  resetMatch,
-  runGameLoop,
-};
+export { compareChoices, displayWinner, gamePlay, addPoint, roundSwitch, startRound, switchRound, resetMatch, runGameLoop };

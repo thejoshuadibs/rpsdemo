@@ -1,11 +1,4 @@
-import {
-  gamePlay,
-  compareChoices,
-  displayWinner,
-  addPoint,
-  roundSwitch,
-  startRound,
-} from "./modules/gameplay.js";
+import { startRound } from "./modules/gameplay.js";
 
 const requiredElements = [
   ".downarrow1", ".downarrow2", ".uparrow", ".rightarrow", ".leftarrow",
@@ -14,9 +7,7 @@ const requiredElements = [
 ];
 
 const missing = requiredElements.filter((selector) => !document.querySelector(selector));
-if (missing.length) {
-  console.error(`Missing required page elements: ${missing.join(", ")}`);
-}
+if (missing.length) console.error(`Missing required page elements: ${missing.join(", ")}`);
 
 const downArrow1 = document.querySelector(".downarrow1");
 const downArrow2 = document.querySelector(".downarrow2");
@@ -46,7 +37,6 @@ async function typeEffect(elementId, text, speed = 100) {
   const element = document.getElementById(elementId);
   if (!element) return;
   element.textContent = "";
-
   for (const character of text) {
     element.textContent += character;
     await pause(speed);
@@ -56,7 +46,6 @@ async function typeEffect(elementId, text, speed = 100) {
 async function deleteEffect(elementId, text, speed = 100) {
   const element = document.getElementById(elementId);
   if (!element) return;
-
   for (let length = text.length - 1; length >= 0; length--) {
     element.textContent = text.slice(0, length);
     await pause(speed);
@@ -74,18 +63,16 @@ async function runSequence() {
   displayButton();
 }
 
-runSequence();
+void runSequence();
 
-downArrow1?.addEventListener("click", () => {
+downArrow1?.addEventListener("click", async () => {
   secondScreen?.classList.add("secondscreen");
-  (async () => {
-    await pause(750);
-    paragraph1?.classList.add("show");
-    await pause(750);
-    paragraph2?.classList.add("show");
-    await pause(750);
-    firstImage?.classList.add("show");
-  })();
+  await pause(750);
+  paragraph1?.classList.add("show");
+  await pause(750);
+  paragraph2?.classList.add("show");
+  await pause(750);
+  firstImage?.classList.add("show");
 });
 
 upArrow?.addEventListener("click", () => secondScreen?.classList.remove("secondscreen"));
@@ -114,7 +101,6 @@ const screenContents = [
 function insertContent() {
   const content = screenContents[counter];
   if (!content) return;
-
   if (heading) heading.textContent = content.header;
   if (paragraph1) paragraph1.textContent = content.firstParagraph;
   if (paragraph2) paragraph2.textContent = content.secondParagraph;
@@ -128,7 +114,7 @@ function insertContent() {
   } else if (counter > 0) {
     if (leftArrow) leftArrow.style.display = "block";
     if (rightArrow) rightArrow.style.display = "block";
-    if (downArrow2) downArrow2.style.display = "none";
+    if (downArrow2) downArrow2.style.display = "none';
     if (upArrow) upArrow.style.display = "none";
   } else {
     if (upArrow) upArrow.style.display = "block";
@@ -148,14 +134,14 @@ async function slideScreens() {
 leftArrow?.addEventListener("click", () => {
   if (counter > 0) {
     counter--;
-    slideScreens();
+    void slideScreens();
   }
 });
 
 rightArrow?.addEventListener("click", () => {
   if (counter < screenContents.length - 1) {
     counter++;
-    slideScreens();
+    void slideScreens();
   }
 });
 
@@ -168,7 +154,6 @@ downArrow2?.addEventListener("click", async () => {
 });
 
 let avatarSelected = false;
-
 avatars.forEach((item) => {
   item.addEventListener("click", async (event) => {
     if (avatarSelected) return;
@@ -180,7 +165,6 @@ avatars.forEach((item) => {
 
     const playerChoice = document.createElement("div");
     playerChoice.className = "player";
-
     const playerImage = source.cloneNode();
     const playerName = document.createElement("div");
     playerName.className = "playername";
@@ -205,26 +189,12 @@ avatars.forEach((item) => {
     await pause(300);
     avatarContainer.replaceChildren(playerChoice, versusElement, rival);
     avatarContainer.style.width = "80%";
-
     await pause(300);
     avatarContainer.classList.remove("peekaboo");
     await pause(2000);
 
     avatarScreen?.classList.remove("avatar-switch");
     if (playerProfile) playerProfile.src = playerImage.src;
-
     startRound();
   });
 });
-
-async function playGame() {
-  const { player, computer, playerElem, computerElem } = await gamePlay();
-  if (!player || !computer) return;
-
-  const result = compareChoices(player, computer);
-  displayWinner(result, playerElem, computerElem);
-  addPoint(result);
-  roundSwitch.style.animationPlayState = "running";
-}
-
-void playGame;
