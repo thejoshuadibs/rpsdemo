@@ -1,5 +1,4 @@
-const images = ["rock.png", "paper.png", "scissors.png"];
-const colors = ["yellow", "green", "red"];
+const choices = ["rock", "paper", "scissors"];
 
 export function computerChoice() {
   return new Promise((resolve) => {
@@ -7,27 +6,28 @@ export function computerChoice() {
     const choiceImage = document.createElement("img");
     const choiceLabel = document.createElement("div");
 
-    const realIndex = Math.floor(Math.random() * 3);
-
-    moChoice.className = "chosencard";
-    moChoice.classList.add("mochoice");
+    moChoice.className = "chosencard mochoice";
     choiceImage.className = "emoji";
     choiceLabel.className = "text";
+    moChoice.append(choiceImage, choiceLabel);
 
-    moChoice.appendChild(choiceImage);
-    moChoice.appendChild(choiceLabel);
+    let index = 0;
+    const animation = setInterval(() => {
+      choiceImage.src = `images/${choices[index]}.png`;
+      index = (index + 1) % choices.length;
+    }, 200);
 
     setTimeout(() => {
-      // clearInterval(selectAnimation);
-      choiceImage.setAttribute("src", `images/${images[realIndex]}`);
-      moChoice.classList.remove("mochoice");
-      moChoice.classList.add(colors[realIndex]);
-      moChoice.classList.add("comot");
-      choiceLabel.textContent = images[realIndex].split(".")[0];
-      choiceLabel.style.textTransform = "capitalize";
+      clearInterval(animation);
 
-      const choiceString = images[realIndex].split(".")[0].trim().toLowerCase();
-      resolve({ element: moChoice, choice: choiceString });
+      const choice = choices[Math.floor(Math.random() * choices.length)];
+      const colors = { rock: "yellow", paper: "green", scissors: "red" };
+
+      choiceImage.src = `images/${choice}.png`;
+      choiceLabel.textContent = choice[0].toUpperCase() + choice.slice(1);
+      moChoice.className = `chosencard ${colors[choice]} comot`;
+
+      resolve({ element: moChoice, choice });
     }, 5000);
   });
 }

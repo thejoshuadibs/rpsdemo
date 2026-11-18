@@ -1,167 +1,190 @@
 import { computerChoice } from "./computerchoice.js";
 
-const rpsCards = document.querySelectorAll(".card");
+const rpsCards = Array.from(document.querySelectorAll(".card"));
 const cardContainer = document.querySelector(".gamecards");
 const gameInfo = document.querySelector(".gameinfo");
-const images = ["rock.png", "paper.png", "scissors.png"];
-
-const playerChoice = document.createElement("div");
-
-const playerLife = document.querySelectorAll(".playerlife>.lifeunit");
-const botLife = document.querySelectorAll(".botlife>.lifeunit");
+const roundLabel = document.querySelector(".round");
+const playerLife = Array.from(document.querySelectorAll(".playerlife > .lifeunit"));
+const botLife = Array.from(document.querySelectorAll(".botlife > .lifeunit"));
 
 const roundSwitch = document.createElement("button");
+roundSwitch.type = "button";
 roundSwitch.className = "round-switch";
 roundSwitch.textContent = "Next Round";
-let index = 0;
+
+let round = 1;
+let playerScore = 0;
+let botScore = 0;
+let acceptingChoice = true;
 
 function compareChoices(human, computer) {
-  if (
-    (human == "rock" && computer == "rock") ||
-    (human == "paper" && computer == "paper") ||
-    (human == "scissors" && computer == "scissors")
-  ) {
-    return "tie";
-  } else if (
-    (human == "rock" && computer == "scissors") ||
-    (human == "paper" && computer == "rock") ||
-    (human == "scissors" && computer == "paper")
-  ) {
-    return "win";
-  } else if (
-    (human == "rock" && computer == "paper") ||
-    (human == "paper" && computer == "scissors") ||
-    (human == "scissors" && computer == "rock")
-  ) {
-    return "loss";
-  }
+  if (human === computer) return "tie";
+
+  const winningChoices = {
+    rock: "scissors",
+    paper: "rock",
+    scissors: "paper",
+  };
+
+  return winningChoices[human] === computer ? "win" : "loss";
 }
 
 function displayWinner(comparison, playerElem, computerElem) {
-  if (comparison == "win") {
-    playerElem.classList.add("winner");
-  } else if (comparison == "loss") {
-    computerElem.classList.add("winner");
+  playerElem?.classList.remove("winner");
+  computerElem?.classList.remove("winner");
+
+  if (comparison === "win") playerElem?.classList.add("winner");
+  if (comparison === "loss") computerElem?.classList.add("winner");
+}
+
+function addPoint(result) {
+  if (result === "tie") return;
+
+  if (result === "win") {
+    playerLife[playerScore]?.classList.add("lifeunit--win");
+    playerScore = Math.min(playerScore + 1, playerLife.length);
   } else {
-    return;
+    botLife[botScore]?.classList.add("lifeunit--win");
+    botScore = Math.min(botScore + 1, botLife.length);
   }
+}
+
+function resetMatch() {
+  round = 1;
+  playerScore = 0;
+  botScore = 0;
+
+  [...playerLife, ...botLife].forEach((unit) => {
+    unit.classList.remove("lifeunit--win");
+  });
+
+  if (roundLabel) roundLabel.textContent = "ROUND 1";
+  roundSwitch.textContent = "Next Round";
+  roundSwitch.onclick = null;
+  switchRound();
+  startRound();
+}
+
+function getColorName(card) {
+  return ["yellow", "green", "red"].find((color) => card.classList.contains(color));
 }
 
 function gamePlay() {
   return new Promise((resolve) => {
-    function getColorCode(name) {
-      switch (name) {
-        case "yellow":
-          return "#e3a852";
-        case "green":
-          return "#72896d";
-        case "red":
-          return "#e76c39";
-      }
+    if (!cardContainer || !gameInfo) {
+      resolve({ player: null, computer: null, playerElem: null, computerElem: null });
+      return;
     }
 
-    const handler = async function (e) {
-      const item = e.currentTarget;
-      const colorName = item.classList[item.classList.length - 1];
+    acceptingChoice = true;
 
-      const backgroundColor = getColorCode(colorName);
+    const handler = async (event) => {
+      if (!acceptingChoice) return;
+      acceptingChoice = false;
 
-      // const playerChoice = document.createElement("div")
+      const card = event.currentTarget;
+      const image = card.querySelector("img");
+      const choice = image?.id?.trim().toLowerCase();
+
+      if (!choices.includes(choice)) {
+        acceptingChoice = true;
+        return;
+      }
+
+      rpsCards.forEach((item) => item.removeEventListener("click", handler));
+
+      const playerChoice = document.createElement("div");
       const playerImage = document.createElement("img");
       const playerText = document.createElement("div");
 
       playerImage.className = "emoji";
-      playerImage.src = `images/${item.firstElementChild.id.toLowerCase()}.png`;
-
+      playerImage.src = `images/${choice}.png`;
+      playerImage.alt = `${choice} hand`;
       playerText.className = "text";
-      playerText.textContent = item.firstElementChild.id;
+      playerText.textContent = choice[0].toUpperCase() + choice.slice(1);
 
-      playerChoice.appendChild(playerImage);
-      playerChoice.appendChild(playerText);
-      playerChoice.className = "chosencard";
-      playerChoice.style.backgroundColor = backgroundColor;
+      playerChoice.className = `chosencard ${getColorName(card) || ""}`;
+      playerChoice.append(playerImage, playerText);
 
-      const you = document.createElement("div");
-      you.textContent = "You";
+      gameInfo.replaceChildren(
+        Object.assign(document.createElement("div"), { textContent: "You" }),
+        Object.assign(document.createElement("div"), { textContent: "Mo" }),
+      );
 
-      const mo = document.createElement("div");
-      mo.textContent = "Mo";
-
-      gameInfo.textContent = "";
-      gameInfo.appendChild(you);
-      gameInfo.appendChild(mo);
-
-      cardContainer.textContent = "";
-
-      const fakeChild = document.createElement("div");
-      const choiceImage = document.createElement("img");
-
-      fakeChild.className = "chosencard";
-      fakeChild.classList.add("mochoice");
-      choiceImage.className = "emoji";
-
-      fakeChild.appendChild(choiceImage);
-
-      // Await the computer choice (animation + final state)
-      cardContainer.appendChild(playerChoice);
-      cardContainer.appendChild(roundSwitch);
-      cardContainer.appendChild(fakeChild);
-
-      setInterval(() => {
-        choiceImage.setAttribute("src", `images/${images[index]}`);
-        index == 2 ? (index = 0) : index++;
-      }, 200);
+      cardContainer.replaceChildren(playerChoice, roundSwitch);
 
       const computerResult = await computerChoice();
-      cardContainer.removeChild(fakeChild);
-
-      cardContainer.appendChild(computerResult.element);
-
-      // remove listeners to avoid duplicate resolves
-      rpsCards.forEach((c) => c.removeEventListener("click", handler));
+      cardContainer.replaceChildren(playerChoice, roundSwitch, computerResult.element);
 
       resolve({
-        player: item.firstElementChild.id.trim().toLowerCase(),
+        player: choice,
         computer: computerResult.choice,
         playerElem: playerChoice,
         computerElem: computerResult.element,
       });
     };
 
-    rpsCards.forEach((item) => {
-      item.addEventListener("click", handler);
-    });
+    rpsCards.forEach((item) => item.addEventListener("click", handler));
   });
 }
-
-function addPoint(result) {
-  let i = 4;
-  let j = 0;
-  if (result == "win") {
-    playerLife[i].classList.add("lifeunit--win");
-    i--;
-  } else if (result == "loss") {
-    botLife[j].classList.add("lifeunit--win");
-    j++;
-  } else {
-    return;
-  }
-}
-
-const originalCards = Array.from(rpsCards);
 
 function switchRound() {
-  cardContainer.textContent = "";
-  originalCards.forEach((item) => {
-    cardContainer.appendChild(item);
+  cardContainer?.replaceChildren(...rpsCards);
+  document.querySelectorAll(".winner").forEach((element) => {
+    element.classList.remove("winner");
   });
-  playerElem.classList.remove("winner");
-  computerElem.classList.remove("winner");
+  gameInfo && (gameInfo.textContent = "Choose One:");
 }
 
-roundSwitch.addEventListener("click", () => {
-  switchRound();
-  window.playGame();
-});
+let nextRoundHandler;
 
-export { compareChoices, displayWinner, gamePlay, addPoint, roundSwitch };
+function startRound() {
+  if (!roundLabel) return;
+  roundLabel.textContent = `ROUND ${round}`;
+
+  switchRound();
+  if (roundSwitch.isConnected) roundSwitch.remove();
+
+  nextRoundHandler = async () => {
+    if (playerScore >= playerLife.length || botScore >= botLife.length) {
+      resetMatch();
+      return;
+    }
+
+    round += 1;
+    roundLabel.textContent = `ROUND ${round}`;
+    switchRound();
+    await runGameLoop();
+  };
+
+  roundSwitch.onclick = nextRoundHandler;
+}
+
+async function runGameLoop() {
+  const { player, computer, playerElem, computerElem } = await gamePlay();
+  if (!player || !computer) return;
+
+  const result = compareChoices(player, computer);
+  displayWinner(result, playerElem, computerElem);
+  addPoint(result);
+
+  if (playerScore >= playerLife.length || botScore >= botLife.length) {
+    const winner = playerScore >= playerLife.length ? "You win!" : "Mo wins!";
+    gameInfo.textContent = winner;
+    roundSwitch.textContent = "Play Again";
+  }
+
+  roundSwitch.style.animationPlayState = "running";
+}
+
+export {
+  compareChoices,
+  displayWinner,
+  gamePlay,
+  addPoint,
+  roundSwitch,
+  startRound,
+  switchRound,
+  resetMatch,
+  runGameLoop,
+};
